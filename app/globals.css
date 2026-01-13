@@ -21,16 +21,15 @@
 }
 
 body {
-  background-image: url('/public/img/image\ 3.png');
+  background-image: url('/img/image3.png') !important; 
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
-
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  
+  /* บังคับให้พื้นหลังโปร่งใสเพื่อให้เห็นรูป */
+  background-color: transparent; 
+  
   min-height: 100vh;
-  /* background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif; */
+  margin: 0;
 }
