@@ -1,70 +1,3 @@
-// import Image from "next/image";
-
-// export default function Home() {
-//   return (
-//     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-//       <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-//         <Image
-//           className="dark:invert"
-//           src="/next.svg"
-//           alt="Next.js logo"
-//           width={100}
-//           height={20}
-//           priority
-//         />
-//         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-//           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-//             To get started, edit the page.tsx file.
-//           </h1>
-//           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-//             Looking for a starting point or more instructions? Head over to{" "}
-//             <a
-//               href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-//               className="font-medium text-zinc-950 dark:text-zinc-50"
-//             >
-//               Templates
-//             </a>{" "}
-//             or the{" "}
-//             <a
-//               href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-//               className="font-medium text-zinc-950 dark:text-zinc-50"
-//             >
-//               Learning
-//             </a>{" "}
-//             center.
-//           </p>
-//         </div>
-//         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-//           <a
-//             className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-//             href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-//             target="_blank"
-//             rel="noopener noreferrer"
-//           >
-//             <Image
-//               className="dark:invert"
-//               src="/vercel.svg"
-//               alt="Vercel logomark"
-//               width={16}
-//               height={16}
-//             />
-//             Deploy Now
-//           </a>
-//           <a
-//             className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-//             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-//             target="_blank"
-//             rel="noopener noreferrer"
-//           >
-//             Documentation
-//           </a>
-//         </div>
-//       </main>
-//     </div>
-//   );
-// }
-
-
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -85,71 +18,47 @@ export default function Home() {
   const sessionRef = useRef<ort.InferenceSession | null>(null);
   const classesRef = useRef<string[] | null>(null);
 
-  // Load OpenCV.js
-  // async function loadOpenCV() {
-  //   if (typeof window === "undefined") return;
-
-  //   if ((window as any).cv) {
-  //     cvRef.current = (window as any).cv;
-  //     return;
-  //   }
-
-  //   await new Promise<void>((resolve, reject) => {
-  //     const script = document.createElement("script");
-  //     script.src = "/opencv/opencv.js";
-  //     script.async = true;
-  //     script.onload = () => {
-  //       const cv = (window as any).cv;
-  //       if (!cv) return reject(new Error("OpenCV โหลดไม่สำเร็จ"));
-  //       cv["onRuntimeInitialized"] = () => {
-  //         cvRef.current = cv;
-  //         resolve();
-  //       };
-  //     };
-  //     script.onerror = () => reject(new Error("โหลด opencv.js ไม่สำเร็จ"));
-  //     document.body.appendChild(script);
-  //   });
-  // }
   async function loadOpenCV() {
-  if (typeof window === "undefined") return;
+    if (typeof window === "undefined") return;
 
-  // ready แล้ว
-  if ((window as any).cv?.Mat) {
-    cvRef.current = (window as any).cv;
-    return;
-  }
+    // ready แล้ว
+    if ((window as any).cv?.Mat) {
+      cvRef.current = (window as any).cv;
+      return;
+    }
 
-  await new Promise<void>((resolve, reject) => {
-    const script = document.createElement("script");
-    script.src = "/opencv/opencv.js";
-    script.async = true;
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "/opencv/opencv.js";
+      script.async = true;
 
-    script.onload = () => {
-      const cv = (window as any).cv;
-      if (!cv) return reject(new Error("OpenCV โหลดแล้วแต่ window.cv ไม่มีค่า"));
+      script.onload = () => {
+        const cv = (window as any).cv;
+        if (!cv)
+          return reject(new Error("OpenCV โหลดแล้วแต่ window.cv ไม่มีค่า"));
 
-      const waitReady = () => {
-        if ((window as any).cv?.Mat) {
-          cvRef.current = (window as any).cv;
-          resolve();
+        const waitReady = () => {
+          if ((window as any).cv?.Mat) {
+            cvRef.current = (window as any).cv;
+            resolve();
+          } else {
+            setTimeout(waitReady, 50);
+          }
+        };
+
+        // บาง build มี callback บาง build พร้อมทันที
+        if ("onRuntimeInitialized" in cv) {
+          cv.onRuntimeInitialized = () => waitReady();
         } else {
-          setTimeout(waitReady, 50);
+          waitReady();
         }
       };
 
-      // บาง build มี callback บาง build พร้อมทันที
-      if ("onRuntimeInitialized" in cv) {
-        cv.onRuntimeInitialized = () => waitReady();
-      } else {
-        waitReady();
-      }
-    };
-
-    script.onerror = () => reject(new Error("โหลด /opencv/opencv.js ไม่สำเร็จ"));
-    document.body.appendChild(script);
-  });
-}
-
+      script.onerror = () =>
+        reject(new Error("โหลด /opencv/opencv.js ไม่สำเร็จ"));
+      document.body.appendChild(script);
+    });
+  }
 
   // Load Haar cascade file into OpenCV FS
   async function loadCascade() {
@@ -365,34 +274,46 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Face Emotion (OpenCV + YOLO11-CLS)</h1>
-
-      <div className="space-y-2">
-        <div className="text-sm">สถานะ: {status}</div>
-        <div className="text-sm">
-          Emotion: <b>{emotion}</b> | Conf: <b>{(conf * 100).toFixed(1)}%</b>
+    <main className="min-h-screen p-10 flex flex-col gap-6 items-start">
+      {/* กล่องหัวข้อและสถานะ */}
+      <div className="bg-[#E9C48C]/90 backdrop-blur-sm p-6 rounded-[20px] shadow-xl border border-white/20 min-w-[300px]">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">Face Emotion</h1>
+        <div className="space-y-2 text-gray-700">
+          <p className="text-lg">สถานะ: {status}</p>
+          <p className="text-xl font-bold">
+            Emotion: {emotion} |{" "}
+            <span className="text-sm font-normal text-gray-500">
+              Conf: {(conf * 100).toFixed(1)}%
+            </span>
+          </p>
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <button
-          className="px-4 py-2 rounded bg-black text-white"
-          onClick={startCamera}
-        >
-          Start Camera
-        </button>
-      </div>
+      {/* ปุ่มกด */}
+      <button
+        className="px-8 py-3 rounded-xl bg-[#C1E1C1] hover:bg-[#A8D1A8] text-gray-800 font-bold shadow-lg transition-transform active:scale-95 flex items-center gap-2"
+        onClick={startCamera}
+      >
+        Start Camera 📷
+      </button>
 
-      <div className="relative w-full max-w-3xl">
+      {/* พื้นที่แสดงกล้อง */}
+      <div className="relative rounded-lg overflow-hidden border-4 border-[#3A7EBF] shadow-2xl bg-black max-w-2xl w-full">
+        {/* แถบชื่อหน้าต่างจำลอง (ถ้าอยากได้สไตล์ Windows) */}
+        <div className="bg-[#3A7EBF] text-white px-3 py-1 text-sm flex justify-between items-center">
+          <span>Camera</span>
+          <div className="flex gap-1">
+            <div className="w-3 h-3 bg-white/30 rounded-sm"></div>
+            <div className="w-3 h-3 bg-white/30 rounded-sm"></div>
+            <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
+          </div>
+        </div>
+
         <video ref={videoRef} className="hidden" playsInline />
-        <canvas
-          ref={canvasRef}
-          className="w-full rounded border"
-        />
+        <canvas ref={canvasRef} className="w-full block" />
       </div>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm font-bold text-gray-800 bg-white/40 px-2 py-1 rounded">
         หมายเหตุ: ต้องกดปุ่ม Start เพื่อขอสิทธิ์เปิดกล้อง
       </p>
     </main>
