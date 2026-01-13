@@ -205,7 +205,7 @@ export default function Home() {
   function preprocessToTensor(faceCanvas: HTMLCanvasElement) {
     // YOLO classification มักรับ input เป็น [1,3,H,W] float32 (0..1)
     // เพื่อให้ง่าย: resize เป็น 64x64 และทำ RGB
-    const size = 64;
+    const size = 128;
     const tmp = document.createElement("canvas");
     tmp.width = size;
     tmp.height = size;
